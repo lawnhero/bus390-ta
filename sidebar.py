@@ -14,7 +14,7 @@ def sidebar():
         st.markdown("# About")
         st.markdown(
             '''📖 Virtual TA allows you to ask questions about course logistics, 
-            as well as pass lecture contents and assignments instructions.'''
+            as well as any Python coding questions.'''
         )
         st.markdown(
             "This tool is a work in progress. "

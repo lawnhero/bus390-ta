@@ -70,10 +70,10 @@ def generate_response(query, choice):
 # 5. Build an app with streamlit
 def main():
 
-    st.header("ISOM 352 Virtual TA - Beta 🔍")
+    st.header("BUS 390 Virtual TA - Beta 🔍")
     # st.write("Currently support queries on syllabus and coding request.")
     sidebar()
-    query = st.text_area(label="Query on syllabus, sample lectures, and sample assignments. Added coding support.",
+    query = st.text_area(label="Query on syllabus and Python coding support.",
                            placeholder="How can I help you today?", 
                            max_chars=200)
         
