@@ -13,7 +13,7 @@ set_verbose(True)
 
 # Set the page_title
 st.set_page_config(
-        page_title="🦜 ISOM 352 Virtual TA - Beta", page_icon="🔍")
+        page_title="🦜 GBS BUS 390 Virtual TA - Beta", page_icon="🔍")
 
 # cache the vectorized embedding database 
 @st.cache_resource
