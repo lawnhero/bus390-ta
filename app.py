@@ -73,7 +73,7 @@ def main():
     st.header("BUS 390 Virtual TA - Beta 🔍")
     # st.write("Currently support queries on syllabus and coding request.")
     sidebar()
-    query = st.text_area(label="Query on syllabus and Python coding support.",
+    query = st.text_area(label="Query on syllabus and Python coding.",
                            placeholder="How can I help you today?", 
                            max_chars=200)
         
