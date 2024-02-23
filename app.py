@@ -56,12 +56,12 @@ openai_chain = chains.openai_chain(llm)
 def generate_response(query, choice):
     if choice == 1: # LLM decides to use OpenAI directly
         decision = "use OpenAI directly"
-        st.markdown(f"Virtual TA decided to {decision} 🐍")
+        st.markdown(f"🦜Virtual TA: I'm going to {decision} 🐍")
         # with st.spinner(f"Generating answers..."): 
         response = openai_chain.stream(input=query)
     else: 
         decision = "get more information" # LLM router to RAG
-        st.markdown(f"Virtual TA decided to {decision} 🔍")
+        st.markdown(f"🦜Virtual TA: I need to {decision} 🔍")
         # with st.spinner(f"Generating answers..."): 
         response = rag_chain.stream(input=query)
     
@@ -73,7 +73,7 @@ def main():
     st.header("BUS 390 Virtual TA - Beta 🔍")
     # st.write("Currently support queries on syllabus and coding request.")
     sidebar()
-    query = st.text_area(label="Query on syllabus and Python coding support.",
+    query = st.text_area(label="Query on syllabus and Python coding.",
                            placeholder="How can I help you today?", 
                            max_chars=200)
         
@@ -85,7 +85,7 @@ def main():
         response = generate_response(query, choice)
 
         # Write response
-        st.write(f"🦜 Virtual TA Response: ", response)
+        st.write(response)
         
         # st.expander("sources").info(source)
 
