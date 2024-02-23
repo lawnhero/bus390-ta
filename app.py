@@ -56,12 +56,12 @@ openai_chain = chains.openai_chain(llm)
 def generate_response(query, choice):
     if choice == 1: # LLM decides to use OpenAI directly
         decision = "use OpenAI directly"
-        st.markdown(f"Virtual TA decided to {decision} 🐍")
+        st.markdown(f"🦜Virtual TA: I'm going to {decision} 🐍")
         # with st.spinner(f"Generating answers..."): 
         response = openai_chain.stream(input=query)
     else: 
         decision = "get more information" # LLM router to RAG
-        st.markdown(f"Virtual TA decided to {decision} 🔍")
+        st.markdown(f"🦜Virtual TA: I need to {decision} 🔍")
         # with st.spinner(f"Generating answers..."): 
         response = rag_chain.stream(input=query)
     
