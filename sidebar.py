@@ -9,6 +9,7 @@ def sidebar():
             "1. Add tick `` to enclose Python codes. Ex: `list` in Python\n"  # noqa: E501
             "2. Provide context, such as syllabus, assignments, lecture etc.\n"
             "3. Try different way to ask the questions. \n"
+            "4. Ask it to create quiz questions on a specific topic, including the answer and explanation.  \n"
         )
         st.markdown("---")
         st.markdown("# About")
