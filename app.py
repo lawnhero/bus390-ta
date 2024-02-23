@@ -85,7 +85,7 @@ def main():
         response = generate_response(query, choice)
 
         # Write response
-        st.write(f"🦜 Virtual TA Response: ", response)
+        st.write(response)
         
         # st.expander("sources").info(source)
 
