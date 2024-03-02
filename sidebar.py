@@ -10,12 +10,12 @@ def sidebar():
         st.markdown(
             "## How to use\n"
             "1. Add tick `` to enclose Python codes. Ex: `list` in Python\n"  # noqa: E501
-            "2. Provide context, such as syllabus, assignments, lecture etc.\n"
-            "3. Try different way to ask the questions. \n"
-            "4. Ask it to create quiz questions on a specific topic, including the answer and explanation.  \n"
+            "2. Try different way to ask the questions. \n"
+            "3. Ask it to create quiz questions on a specific topic, including the answer and explanation.  \n"
         )
-        st.markdown("---")
         st.button("Clear Chat History", on_click=clear_chat_history)
+
+        # st.markdown("---")
         st.markdown("---")
         st.markdown("# About")
         st.markdown(
