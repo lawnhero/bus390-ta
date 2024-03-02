@@ -1,6 +1,9 @@
 import streamlit as st
 import os
 
+def clear_chat_history():
+    st.session_state.chat_history = []
+
 def sidebar():
     with st.sidebar:
         
@@ -11,6 +14,8 @@ def sidebar():
             "3. Try different way to ask the questions. \n"
             "4. Ask it to create quiz questions on a specific topic, including the answer and explanation.  \n"
         )
+        st.markdown("---")
+        st.button("Clear Chat History", on_click=clear_chat_history)
         st.markdown("---")
         st.markdown("# About")
         st.markdown(
