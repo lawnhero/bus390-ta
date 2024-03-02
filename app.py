@@ -82,17 +82,17 @@ def main():
         choice = router_choice(query, router_chain)
 
         # Get response
-        response = generate_response(query, choice)
+        # response = generate_response(query, choice)
 
         # Write response
-        st.write(response)
+        response = st.write_stream(generate_response(query, choice))
         
         # st.expander("sources").info(source)
 
         if 'last_query' in st.session_state: 
             st.markdown("---") 
             st.markdown(f'''Previous query: {st.session_state.last_query}''')
-            # st.write(f'''Response: {st.session_state.last_result}''')
+            st.markdown(f'''Response: {st.session_state.last_result}''')
         
         st.session_state['last_query'] = query
         st.session_state['last_result'] = response
