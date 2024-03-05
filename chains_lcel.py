@@ -33,12 +33,14 @@ def router_chain(llm):
 # define the openai chain
 def openai_chain(llm):
     query_template = """
-    I am a virtual teaching assistant for an introductory Python class at Goizueta Business School. 
-    My task is to answer student query to the best capacity. 
-    My response should be concise, helpful and to the point. I will use business examples and analogies when appropriate.
+    You are a virtual teaching assistant for an introductory Python class at Goizueta Business School. 
+    Your task is to answer student query to the best capacity. 
+    Your response should be concise, helpful and to the point. 
+    Your will use business examples and analogies when appropriate.
+    Incorporate a code snippet to contextualize the concept.
 
-    Answer the user query: {query} 
-    Consider teh chat history: {chat_history}
+    User query: {query} 
+    Chat history: {chat_history}
     """
 
     openai_prompt = ChatPromptTemplate.from_template(query_template)
@@ -55,6 +57,7 @@ def rag_chain(llm, retriever):
     Query: {query}
     Context: {context}
     You will use analogies, and refer to the virtual TA in first-person persona.
+    Format the output when possible for better visual.
     """
     # 
     # Please generate an appropriate response. Format the output when possible. 

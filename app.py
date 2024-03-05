@@ -96,39 +96,28 @@ def main():
             with st.chat_message("AI"):
                 st.markdown(message.content)
     
-    # if model_option == "python": 
-    if model_option == "python":
-        # get user query
-        if user_query := st.chat_input("Hello there. Feel free to ask me Python? 🐍"):
-            st.session_state.chat_history.append(HumanMessage(user_query))
-            # display user query
-            with st.chat_message("Human"):
-                st.markdown(user_query)
-                
-            # st.markdown(f"🦜Virtual TA: I'm going to OpenAI 🐍")
-            # get response from AI
-            with st.chat_message("AI"):
+
+    # get user query
+    if user_query := st.chat_input("Hello there. How can I help you today? 🐍"):
+        st.session_state.chat_history.append(HumanMessage(user_query))
+        # display user query
+        with st.chat_message("Human"):
+            st.markdown(user_query)
+
+        # Generate AI response based on user query
+        with st.chat_message("AI"):
+            # if model_option == "python": 
+            if model_option == "python":       
                 ai_response = st.write_stream(
                     openai_chain.stream(input={'query': user_query, 
-                    'chat_history': st.session_state.chat_history}))
-            # append AI response to chat history
-            st.session_state.chat_history.append(AIMessage(ai_response))
-    
-    # model option is RAG for the course    # 
-    else:
-        if user_query := st.chat_input("Hello there. Ask me about the Course? 🔍"):
-            st.session_state.chat_history.append(HumanMessage(user_query))
-            # display user query
-            with st.chat_message("Human"):
-                st.markdown(user_query)
-
-            # st.markdown(f"🦜Virtual TA: I'm going to retrieve data ")
-            # get response from AI
-            with st.chat_message("AI"):
+                                               'chat_history': st.session_state.chat_history}))
+        
+            # model option is RAG for the course    # 
+            else:                
                 ai_response = st.write_stream(rag_chain.stream(input=user_query))
 
-            # append AI response to chat history
-            st.session_state.chat_history.append(AIMessage(ai_response))
+        # append AI response to chat history
+        st.session_state.chat_history.append(AIMessage(ai_response))
 
 if __name__ == '__main__':
     main()
