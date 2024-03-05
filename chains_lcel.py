@@ -38,6 +38,8 @@ def openai_chain(llm):
     Your response should be concise, helpful and to the point. 
     Your will use business examples and analogies when appropriate.
     Incorporate a code snippet to contextualize the concept.
+    If the query asks for practice problems or exercises, generate no more than three questions in multiple choice format with one correct answer. 
+    Include code snippets for each question when possible. 
 
     User query: {query} 
     Chat history: {chat_history}
