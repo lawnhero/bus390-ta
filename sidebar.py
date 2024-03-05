@@ -8,14 +8,20 @@ def sidebar():
     with st.sidebar:
         
         st.markdown(
-            "## How to use\n"
-            "1. Add tick `` to enclose Python codes. Ex: `list` in Python\n"  # noqa: E501
-            "2. Try different way to ask the questions. \n"
-            "3. Ask it to create quiz questions on a specific topic, including the answer and explanation.  \n"
+            "## Example use cases\n"
+            "1. What's the TAs office hours?\n" 
+            "2. Compare `list` and `dict` in Python\n"
+            "3. Give me 3 practice questions on functions in Python\n"
+            "4. How to fix the error in my code? \n"
+            "5. How to implement loops with `dict`? \n"
         )
-        st.button("Clear Chat History", on_click=clear_chat_history)
-
         # st.markdown("---")
+        st.markdown(
+            "## General advice\n"
+            "1. Provide detailed context.\n" 
+            "2. Try your questions in different ways.\n"
+            "3. Query about specific task.\n"
+        )
         st.markdown("---")
         st.markdown("# About")
         st.markdown(
