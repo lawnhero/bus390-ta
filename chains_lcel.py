@@ -31,23 +31,28 @@ def router_chain(llm):
     return router_chain
 
 # define the openai chain
-def openai_chain(llm):
+def code_chain(llm):
     query_template = """
     You are a virtual teaching assistant for an introductory Python class at Goizueta Business School. 
     Your task is to answer student query to the best capacity. 
-    Your response should be concise, helpful and to the point. 
-    Your will use business examples and analogies when appropriate.
-    Incorporate a code snippet to contextualize the concept.
-    If the query asks for practice problems or exercises, generate no more than three questions in multiple choice format with one correct answer. 
-    Include code snippets for each question when possible. 
+    
+    - if the query ask for clarification or explanation of Python, your response should be concise, helpful and to the point. Incorporate a code snippet to contextualize the concept. Use business examples and analogies when appropriate.
+    - If the query asks for practice problems or exercises, generate no more than two questions in multiple choice format with one correct answer. Include code snippets for each question when possible. Highlight the correct answer and provide a brief reasoning.
+    - If the query is about coding errors, provide a brief explanation of the error and then how to fix it.
 
     User query: {query} 
     Chat history: {chat_history}
     """
 
-    openai_prompt = ChatPromptTemplate.from_template(query_template)
+    prompt = ChatPromptTemplate.from_template(query_template)
 
-    chain = openai_prompt | llm | output_parser
+    setup = RunnableParallel(
+        {"query": RunnablePassthrough(),
+         "chat_history": RunnablePassthrough(),
+         }
+    )
+
+    chain = setup | prompt | llm | output_parser
 
     return chain
 

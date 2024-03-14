@@ -3,6 +3,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.prompts import PromptTemplate
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, AIMessage
 
 from langchain.globals import set_verbose
@@ -33,40 +34,26 @@ db = load_db(kb_db_path)
 retriever = db.as_retriever()
 
 # 3. Setup LLM and chains
-llm = ChatOpenAI(temperature=0.2, 
+llm_gpt35 = ChatOpenAI(temperature=0.2, 
                 #  model="gpt-4-0125-preview",
                  model="gpt-3.5-turbo-1106",
                  verbose=False,
                  max_tokens=300,
                  )
 
-# # 3a. Setup query router
-# router_chain = chains.router_chain(llm)
+llm_haiku = ChatAnthropic(temperature=0.2, 
+                    model='claude-3-haiku-20240307',
+                    verbose=False,
+                    max_tokens=300,
+                    )
 
-# def router_choice(query, chain):
-#     choice = chain.invoke(input={'query': query})
-#     return int(choice)
+# 3 Setup the various chains to perform various functions
 
 # 3b. Setup LLMChain & prompts for RAG answer generation
-rag_chain = chains.rag_chain(llm, retriever)
+rag_chain = chains.rag_chain(llm_haiku, retriever)
 
 # 3c. Setup direct openai_chain
-openai_chain = chains.openai_chain(llm)
-
-# # 4. generate response based on router choice
-# def generate_response(query, choice):
-#     if choice == 1: # LLM decides to use OpenAI directly
-#         decision = "use OpenAI directly"
-#         st.markdown(f"🦜Virtual TA: I'm going to {decision} 🐍")
-#         # with st.spinner(f"Generating answers..."): 
-#         response = openai_chain.stream(input=query)
-#     else: 
-#         decision = "get more information" # LLM router to RAG
-#         st.markdown(f"🦜Virtual TA: I need to {decision} 🔍")
-#         # with st.spinner(f"Generating answers..."): 
-#         response = rag_chain.stream(input=query)
-    
-#     return response
+chat_chain = chains.code_chain(llm_gpt35)
         
 # 5. Build an app with streamlit
 def main():
@@ -77,10 +64,6 @@ def main():
     # Initialize chat history in session state
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
-
-    # truncate chat history to last 5 messages
-    if len(st.session_state.chat_history) > 5:
-        st.session_state.chat_history = st.session_state.chat_history[-5:]
 
     # Create a toggle button to choose between Python and Course
     model_option = (
@@ -96,27 +79,33 @@ def main():
             with st.chat_message("AI"):
                 st.markdown(message.content)
     
+    # truncate chat history to last 5 messages
+    if len(st.session_state.chat_history) > 2:
+        st.session_state.chat_history = st.session_state.chat_history[-2:]
+    
 
     # get user query
     if user_query := st.chat_input("Hello there. How can I help you today? 🐍"):
-        st.session_state.chat_history.append(HumanMessage(user_query))
+        
         # display user query
         with st.chat_message("Human"):
             st.markdown(user_query)
 
         # Generate AI response based on user query
-        with st.chat_message("AI"):
+        with st.chat_message("AI", avatar="🦜"):
             # if model_option == "python": 
             if model_option == "python":       
                 ai_response = st.write_stream(
-                    openai_chain.stream(input={'query': user_query, 
+                    chat_chain.stream(input={'query': user_query, 
                                                'chat_history': st.session_state.chat_history}))
         
             # model option is RAG for the course    # 
             else:                
-                ai_response = st.write_stream(rag_chain.stream(input=user_query))
+                ai_response = st.write_stream(
+                    rag_chain.stream(input=user_query))
 
         # append AI response to chat history
+        st.session_state.chat_history.append(HumanMessage(user_query))
         st.session_state.chat_history.append(AIMessage(ai_response))
 
 if __name__ == '__main__':
