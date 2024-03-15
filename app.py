@@ -22,7 +22,7 @@ st.set_page_config(
 # load the vectorized database
 def load_db(db_path, embedding_model='text-embedding-ada-002'):
     embeddings = OpenAIEmbeddings(model=embedding_model, chunk_size=1)
-    db_loaded = FAISS.load_local(db_path, embeddings)
+    db_loaded = FAISS.load_local(db_path, embeddings,allow_dangerous_deserialization=True)
     
     return db_loaded
 
