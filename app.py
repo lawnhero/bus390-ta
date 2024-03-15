@@ -53,7 +53,7 @@ llm_haiku = ChatAnthropic(temperature=0.2,
 rag_chain = chains.rag_chain(llm_haiku, retriever)
 
 # 3c. Setup direct openai_chain
-chat_chain = chains.code_chain(llm_gpt35)
+chat_chain = chains.code_chain(llm_haiku)
         
 # 5. Build an app with streamlit
 def main():

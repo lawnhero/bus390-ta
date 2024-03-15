@@ -9,11 +9,11 @@ def sidebar():
         
         st.markdown(
             "## Example use cases\n"
-            "1. What's the TAs office hours?\n" 
-            "2. Compare `list` and `dict` in Python\n"
-            "3. Give me 3 practice questions on functions in Python\n"
+            "1. How can I contact the professor?\n" 
+            "2. What's a parameter in Python function\n"
+            "3. How to use my own module in Colab? \n"
             "4. How to fix the error in my code? \n"
-            "5. How to implement loops with `dict`? \n"
+            "5. Give me a practice question on Python functions\n"
         )
         # st.markdown("---")
         st.markdown(
