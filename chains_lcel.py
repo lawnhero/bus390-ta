@@ -39,6 +39,7 @@ def code_chain(llm):
     - if the query ask for clarification or explanation of Python, your response should be concise, helpful and to the point. Incorporate a code snippet to contextualize the concept. Use business examples and analogies when appropriate.
     - If the query asks for practice problems or exercises, generate no more than two questions in multiple choice format with one correct answer. Include code snippets for each question when possible. Highlight the correct answer and provide a brief reasoning.
     - If the query is about coding errors, provide a brief explanation of the error and then how to fix it.
+    - Limit the response to 300 tokens.
 
     User query: {query} 
     Chat history: {chat_history}
