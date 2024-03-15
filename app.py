@@ -15,7 +15,7 @@ set_verbose(True)
 
 # Set the page_title
 st.set_page_config(
-        page_title="🦜 GBS BUS 390 Virtual TA - Beta", page_icon="🔍")
+        page_title="🦜 GBS BUS 390 Virtual TA - Beta", page_icon="🔍", layout="wide")
 
 # cache the vectorized embedding database 
 @st.cache_resource
@@ -63,12 +63,17 @@ def main():
     sidebar()
     # Initialize chat history in session state
     if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+        st.session_state.chat_history = [AIMessage("Hello there! Toggle the choice to start a conversation.")]
 
     # Create a toggle button to choose between Python and Course
     model_option = (
         "course" if st.toggle("Query on Python ⇄ Course", value=False) else "python"
     )
+    # initalize the query text box
+    if "python" in model_option:
+        initial_text = "Hello there. How can I help you with 🐍 today? "
+    else:
+        initial_text = "Hello there. What about the course 📚 would you like to know today? "
 
     # display previous conversation history
     for message in st.session_state.chat_history:
@@ -76,16 +81,17 @@ def main():
             with st.chat_message("Human"):
                 st.markdown(message.content)
         elif isinstance(message, AIMessage):
-            with st.chat_message("AI"):
+            with st.chat_message("AI", avatar="🦜"):
                 st.markdown(message.content)
     
     # truncate chat history to last 5 messages
-    if len(st.session_state.chat_history) > 2:
-        st.session_state.chat_history = st.session_state.chat_history[-2:]
+    max_num_messages = 2
+    if len(st.session_state.chat_history) > max_num_messages:
+        st.session_state.chat_history = st.session_state.chat_history[-max_num_messages:]
     
 
     # get user query
-    if user_query := st.chat_input("Hello there. How can I help you today? 🐍"):
+    if user_query := st.chat_input(initial_text):
         
         # display user query
         with st.chat_message("Human"):
