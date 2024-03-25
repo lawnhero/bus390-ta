@@ -40,7 +40,9 @@ def code_chain(llm):
     - If the query asks for practice problems or exercises, generate no more than two questions in multiple choice format with one correct answer. Include code snippets for each question when possible. Highlight the correct answer and provide a brief reasoning. 
     - If the query asks for new or different questions, generate different questions from the previous ones in {chat_history} and main similar difficulty level. Do not repeat the same questions.
     - If the query is about coding errors, provide a brief explanation of the error and then how to fix it.
-    - Limit the response to 300 tokens.
+
+    User query: {query} 
+    Chat history: {chat_history}
     """
 
     prompt = ChatPromptTemplate.from_template(query_template)
