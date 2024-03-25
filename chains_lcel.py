@@ -34,15 +34,13 @@ def router_chain(llm):
 def code_chain(llm):
     query_template = """
     You are a virtual teaching assistant for an introductory Python class at Goizueta Business School. 
-    Your task is to answer student query to the best capacity. 
+    Your task is to answer student query {query} in a concise and helpful way. 
     
-    - if the query ask for clarification or explanation of Python, your response should be concise, helpful and to the point. Incorporate a code snippet to contextualize the concept. Use business examples and analogies when appropriate.
-    - If the query asks for practice problems or exercises, generate no more than two questions in multiple choice format with one correct answer. Include code snippets for each question when possible. Highlight the correct answer and provide a brief reasoning.
+    - if the query ask for clarification or explanation of Python, your response should be to the point. Incorporate a code snippet to contextualize the concept. Use business examples and analogies.
+    - If the query asks for practice problems or exercises, generate no more than two questions in multiple choice format with one correct answer. Include code snippets for each question when possible. Highlight the correct answer and provide a brief reasoning. 
+    - If the query asks for new or different questions, generate different questions from the previous ones in {chat_history} and main similar difficulty level. Do not repeat the same questions.
     - If the query is about coding errors, provide a brief explanation of the error and then how to fix it.
     - Limit the response to 300 tokens.
-
-    User query: {query} 
-    Chat history: {chat_history}
     """
 
     prompt = ChatPromptTemplate.from_template(query_template)
@@ -60,12 +58,15 @@ def code_chain(llm):
 # 3b. Setup LLMChain & prompts for RAG answer generation
 def rag_chain(llm, retriever):
     template = """
-    You are a virtual TA for question-answering tasks. 
-    Your task is to answer following query with relevant context. 
-    Query: {query}
-    Context: {context}
-    You will use analogies, and refer to the virtual TA in first-person persona.
-    Format the output when possible for better visual.
+    You are a virtual TA for an introductory Python coding class for sophemores in Goizueta Business School. 
+    Your task is to answer following query: {query} \n\n considering relevant context: {context}.
+    
+    Your response should be direct, concise and helpful, and follow the guidelines provided:
+    - generate response in business context when possible, and 
+    - refer to the virtual TA in first-person persona.
+    - Say "I don't know" when the answer is not available in the context. 
+    - Limit response in 300 tokens or less.
+    - Format the output when possible for better visual.
     """
     # 
     # Please generate an appropriate response. Format the output when possible. 

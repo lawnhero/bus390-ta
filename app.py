@@ -22,7 +22,9 @@ st.set_page_config(
 # load the vectorized database
 def load_db(db_path, embedding_model='text-embedding-ada-002'):
     embeddings = OpenAIEmbeddings(model=embedding_model, chunk_size=1)
-    db_loaded = FAISS.load_local(db_path, embeddings,allow_dangerous_deserialization=True)
+    db_loaded = FAISS.load_local(db_path, embeddings,
+                                 allow_dangerous_deserialization=True
+                                 )
     
     return db_loaded
 
@@ -36,7 +38,7 @@ retriever = db.as_retriever()
 # 3. Setup LLM and chains
 llm_gpt35 = ChatOpenAI(temperature=0.2, 
                 #  model="gpt-4-0125-preview",
-                 model="gpt-3.5-turbo-1106",
+                 model="gpt-3.5-turbo",
                  verbose=False,
                  max_tokens=300,
                  )
@@ -53,7 +55,7 @@ llm_haiku = ChatAnthropic(temperature=0.2,
 rag_chain = chains.rag_chain(llm_haiku, retriever)
 
 # 3c. Setup direct openai_chain
-chat_chain = chains.code_chain(llm_haiku)
+chat_chain = chains.code_chain(llm_gpt35)
         
 # 5. Build an app with streamlit
 def main():
