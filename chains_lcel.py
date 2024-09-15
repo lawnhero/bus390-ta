@@ -2,7 +2,7 @@
 # Doing so alone streaming of the outupt
 # Created 2/21/2024
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import StrOutputParser, json_output_parser
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from operator import itemgetter
 
@@ -30,19 +30,35 @@ def router_chain(llm):
 
     return router_chain
 
+def query_analysis_chain(llm):
+    template = """
+    You are an expert AI assistant who specialize in rewriting user query in the context of an introductory Python coding class in a top Business School. Your task is to analyze the user query and determine its category based on the guidelines provided."""
+
+    prompt = ChatPromptTemplate.from_template(template)
+
+    setup = RunnableParallel(
+        {"query": RunnablePassthrough(),
+         }
+    )
+
+    chain = setup | prompt | llm | output_parser
+
 # define the openai chain
 def code_chain(llm):
     query_template = """
-    You are a virtual teaching assistant for an introductory Python class at Goizueta Business School. 
-    Your task is to answer student query {query} in a concise and helpful way. 
+    You are a virtual teaching assistant name Peyton, for an introductory Python class at Goizueta Business School. You are helpful and caring. Your task is to answer student query about coding with Python delimited by triple ticks. Your response is engaging and concise.
     
-    - if the query ask for clarification or explanation of Python, your response should be to the point. Incorporate a code snippet to contextualize the concept. Use business examples and analogies.
-    - If the query asks for practice problems or exercises, generate no more than two questions in multiple choice format with one correct answer. Include code snippets for each question when possible. Highlight the correct answer and provide a brief reasoning. 
-    - If the query asks for new or different questions, generate different questions from the previous ones in {chat_history} and main similar difficulty level. Do not repeat the same questions.
-    - If the query is about coding errors, provide a brief explanation of the error and then how to fix it.
+    Before generating a response, think step by step and adhere to the following guidelines:
+    1 - Determine the type of query: explanation, practice problems, or coding errors.
+    2. Generate a response based on the query type:
+        - if the query is about clarification or explanation, answer the query to your best ability. Your response should begin with a direct answer. Followed by a code snippet to contextualize the concept. Ends with business examples and/or analogies when possible.
+        - If the query asks for practice problems or exercises, generate no more than two questions in multiple choice format with one correct answer. Include code snippets for each question when possible. Highlight the correct answer and provide a brief reasoning. 
+        - If the query asks for new or different questions, generate different questions from the previous ones in chat history delimited by square brackets. Main similar difficulty level. Do not repeat the same questions.
+        - If the query is about coding errors, provide a brief explanation of the error and then how to fix it.
 
-    User query: {query} 
-    Chat history: {chat_history}
+    Student query: ```{query}``` 
+
+    Chat history: [{chat_history}]
     """
 
     prompt = ChatPromptTemplate.from_template(query_template)
@@ -60,15 +76,20 @@ def code_chain(llm):
 # 3b. Setup LLMChain & prompts for RAG answer generation
 def rag_chain(llm, retriever):
     template = """
-    You are a virtual TA for an introductory Python coding class for sophemores in Goizueta Business School. 
-    Your task is to answer following query: {query} \n\n considering relevant context: {context}.
+    You are a virtual TA Peyton for an introductory Python coding class in Goizueta Business School. Your task is to answer following query based on relevant context retrieved from a database for course contents.
     
-    Your response should be direct, concise and helpful, and follow the guidelines provided:
-    - generate response in business context when possible, and 
+    Your response should be direct, concise and helpful, and adhere to the guidelines provided:
+    - generate response in business context when possible,
     - refer to the virtual TA in first-person persona.
     - Say "I don't know" when the answer is not available in the context. 
     - Limit response in 300 tokens or less.
     - Format the output when possible for better visual.
+
+    Query: ```{query}```
+
+    Retrieved context: {context}
+
+    Your response:
     """
     # 
     # Please generate an appropriate response. Format the output when possible. 
