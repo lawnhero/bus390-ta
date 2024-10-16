@@ -17,23 +17,16 @@ set_verbose(True)
 st.set_page_config(
         page_title="🦜 GBS BUS 390 Virtual TA - Beta", page_icon="🔍", layout="wide")
 
-# cache the vectorized embedding database 
-@st.cache_resource
-# load the vectorized database
-def load_db(db_path, embedding_model='text-embedding-ada-002'):
-    embeddings = OpenAIEmbeddings(model=embedding_model, chunk_size=1)
-    db_loaded = FAISS.load_local(db_path, embeddings,
-                                 allow_dangerous_deserialization=True
-                                 )
-    
-    return db_loaded
+from utils import load_db, query_db_connection, process_and_store_query
 
 # 1. Load the Vectorised database
 kb_db_path = 'data/emb_db'
-db = load_db(kb_db_path)
+retriever = load_db(kb_db_path).as_retriever()
 
-# 2. Function for similarity search
-retriever = db.as_retriever()
+# 2. MongoDB Atlas connection
+mongo_db = query_db_connection()
+collection = mongo_db['Python_toolkit']
+
 
 # 3. Setup LLM and chains
 llm_gpt35 = ChatOpenAI(temperature=0.2, 
@@ -98,6 +91,9 @@ def main():
         # display user query
         with st.chat_message("Human"):
             st.markdown(user_query)
+        
+        # save to MongoDB database
+        process_and_store_query(collection, query=user_query, type=model_option)
 
         # Generate AI response based on user query
         with st.chat_message("AI", avatar="🦜"):
