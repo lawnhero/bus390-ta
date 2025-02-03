@@ -7,6 +7,8 @@ from datetime import datetime
 
 # knowledge base path
 kb_db_path = 'data/emb_db'
+MONGODB_PASSWORD="9vYq3TWWsQn7bp2v"
+
 
 
 @st.cache_resource
@@ -19,7 +21,6 @@ def load_db(db_path=kb_db_path, embedding_model='text-embedding-ada-002'):
     print("Database loaded")
     return db_loaded
 
-MONGODB_PASSWORD="9vYq3TWWsQn7bp2v"
 
 uri = f"mongodb+srv://streamlit_app:{MONGODB_PASSWORD}@virtual-ta.q344d.mongodb.net/myFirstDatabase?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE"
 

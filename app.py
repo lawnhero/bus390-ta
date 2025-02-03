@@ -1,74 +1,95 @@
 import streamlit as st
-from langchain_community.vectorstores import FAISS
-from langchain.prompts import PromptTemplate
-from langchain_openai import OpenAIEmbeddings
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, AIMessage
 
 from langchain.globals import set_verbose
-import chains_lcel as chains
-from sidebar import sidebar
+import utils.chains_lcel as chains
+from utils.sidebar import sidebar
+import utils.llm_models as llms
+from utils.utils import load_db, query_db_connection, process_and_store_query
+from utils.tools import create_tool_chain
+from datetime import datetime
 
-# Enable verbose logging
-set_verbose(True)
+# import langchain
+# langchain.debug = False
 
-# Set the page_title
-st.set_page_config(
-        page_title="🦜 GBS BUS 390 Virtual TA - Beta", page_icon="🔍", layout="wide")
+# Initialize resources
+def initialize_resources():
+    # Load database and setup retriever
+    retriever = load_db().as_retriever()
 
-from utils import load_db, query_db_connection, process_and_store_query
+    # Connect to MongoDB
+    mongo_db = query_db_connection()
+    collection = mongo_db['Python_toolkit']
+    return retriever, collection
 
-# 1. Load the Vectorised database
-kb_db_path = 'data/emb_db'
-retriever = load_db(kb_db_path).as_retriever()
-
-# 2. MongoDB Atlas connection
-mongo_db = query_db_connection()
-collection = mongo_db['Python_toolkit']
-
-
-# 3. Setup LLM and chains
-llm_gpt35 = ChatOpenAI(temperature=0.2, 
-                #  model="gpt-4-0125-preview",
-                 model="gpt-3.5-turbo",
-                 verbose=False,
-                 max_tokens=300,
-                 )
-
-llm_haiku = ChatAnthropic(temperature=0.2, 
-                    model='claude-3-haiku-20240307',
-                    verbose=False,
-                    max_tokens=300,
-                    )
-
-# 3 Setup the various chains to perform various functions
-
-# 3b. Setup LLMChain & prompts for RAG answer generation
-rag_chain = chains.rag_chain(llm_haiku, retriever)
-
-# 3c. Setup direct openai_chain
-chat_chain = chains.code_chain(llm_gpt35)
+def initialize_chains(retriever):
+    """Initialize all LLM models and chains with caching."""
+    try:
         
-# 5. Build an app with streamlit
-def main():
+        # Setup LLM models
+        gpt4o_mini = llms.openai_gpt4o_mini
+        gpt4o_mini_json = llms.openai_4o_mini_json
+        claude_sonnet = llms.claude_sonnet
+        claude_haiku = llms.claude_haiku
+        gpt4o = llms.openai_gpt4o
+        
+        # Create base chains
+        chains_dict = {
+            'rag': chains.rag_chain(claude_haiku, retriever),
+            'exercise': chains.exercise_chain(claude_sonnet),
+            'chat': chains.chat_chain(gpt4o_mini),
+            'explain': chains.code_chain(gpt4o),
+            'debug': chains.code_chain(claude_haiku),
+        }
+        
+        # Create tool chain
+        tool_chain = create_tool_chain(gpt4o_mini, chains_dict)
+        
+        # Return chains dictionary with tool chain
+        return tool_chain, chains_dict
+    
+    except Exception as e:
+        st.error(f"Failed to initialize chains: {str(e)}")
+        raise e
 
+def call_function(name, args: dict, chat_history, chains_dict):
+    """Invoke the appropriate tool based on the name and arguments."""
+
+    if name == "course_information":
+        return chains_dict['rag'].stream(input={'chat_history': chat_history,**args})     
+    if name == "explain_concept":
+        return chains_dict['explain'].stream(input={'chat_history': chat_history, **args})
+    if name == "generate_exercise":
+        return chains_dict['exercise'].stream(input={'chat_history': chat_history, **args})
+    if name == "debug_code":
+        return chains_dict['debug'].stream(input=args)
+    if name == "general_chat":
+        return chains_dict['chat'].stream(input={**args, "chat_history": chat_history})
+    else:
+        return "Invalid tool name"
+        
+# Build an app with streamlit
+def main():
+    # Set the page_title
+    st.set_page_config(
+            page_title="🦜 GBS BUS 390 Virtual TA - Beta", page_icon="🔍", layout="wide")
+    
     st.header("BUS 390 Virtual TA - Beta 🔍")
     # st.write("Currently support queries on syllabus and coding request.")
     sidebar()
+
+    # Initialize resources
+    retriever, collection = initialize_resources()
+    # Initialize chains with caching
+    agent, chain_dict = initialize_chains(retriever)
+    
+    # Initialize the query text box
+    initial_text = "Hi. I'm your virtual TA Peyton. How can I help you today?"
+
     # Initialize chat history in session state
     if "chat_history" not in st.session_state:
-        st.session_state.chat_history = [AIMessage("Hello there! Toggle the choice to start a conversation.")]
-
-    # Create a toggle button to choose between Python and Course
-    model_option = (
-        "course" if st.toggle("Query on Python ⇄ Course", value=False) else "python"
-    )
-    # initalize the query text box
-    if "python" in model_option:
-        initial_text = "Hello there. How can I help you with 🐍 today? "
-    else:
-        initial_text = "Hello there. What about the course 📚 would you like to know today? "
+        st.session_state.chat_history = []
+        st.session_state.chat_history.append(AIMessage(initial_text))
 
     # display previous conversation history
     for message in st.session_state.chat_history:
@@ -79,12 +100,8 @@ def main():
             with st.chat_message("AI", avatar="🦜"):
                 st.markdown(message.content)
     
-    # truncate chat history to last 5 messages
-    max_num_messages = 2
-    if len(st.session_state.chat_history) > max_num_messages:
-        st.session_state.chat_history = st.session_state.chat_history[-max_num_messages:]
     
-
+    
     # get user query
     if user_query := st.chat_input(initial_text):
         
@@ -93,24 +110,44 @@ def main():
             st.markdown(user_query)
         
         # save to MongoDB database
-        process_and_store_query(collection, query=user_query, type=model_option)
+        process_and_store_query(collection, query=user_query)
 
-        # Generate AI response based on user query
-        with st.chat_message("AI", avatar="🦜"):
-            # if model_option == "python": 
-            if model_option == "python":       
-                ai_response = st.write_stream(
-                    chat_chain.stream(input={'query': user_query, 
-                                               'chat_history': st.session_state.chat_history}))
+        # Use tool chain to handle the query with chat history
+        conversation_context = "\n".join([
+            f"{'User' if isinstance(msg, HumanMessage) else 'Assistant'}: {msg.content}"
+            for msg in st.session_state.chat_history[-3:]  # Last 3 exchanges for context
+        ])
         
-            # model option is RAG for the course    # 
-            else:                
-                ai_response = st.write_stream(
-                    rag_chain.stream(input=user_query))
+        # decide which tool to call
+        tool_call = agent.invoke(
+            f"""
+            Your only task is to decide which tool to call based on the user query delimited with <query> tab and chat history, and generate the appropriate arguements for the tool call.
+            
+            Previous conversation: {conversation_context} \n
+            Query: {user_query}\n
+            Generate the tool call with appropriate arguments. Do not generate direct response. Enrich the query for the tool call when appropriate, but don't fundamentally change it. Limit query to no more than 25 tokens.
+            """)
+        
+        print(tool_call.tool_calls)
+
+        # call the tool
+        response = call_function(
+            name=tool_call.tool_calls[0]["name"],
+            args=tool_call.tool_calls[0]['args'],
+            chat_history=st.session_state.chat_history[-3:],
+            chains_dict=chain_dict
+        )
+        # display AI response
+        with st.chat_message("AI", avatar="🦜"):
+            ai_response = st.write_stream(response)
 
         # append AI response to chat history
         st.session_state.chat_history.append(HumanMessage(user_query))
         st.session_state.chat_history.append(AIMessage(ai_response))
 
+    # truncate chat history to last 5 messages
+    max_num_messages = 5
+    if len(st.session_state.chat_history) > max_num_messages:
+        st.session_state.chat_history = st.session_state.chat_history[-max_num_messages:]
 if __name__ == '__main__':
     main()
