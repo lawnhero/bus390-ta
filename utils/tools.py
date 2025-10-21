@@ -2,11 +2,11 @@
 Tools and Agent implementation for the Virtual TA system.
 """
 
-from langchain.tools import StructuredTool
+from langchain_core.tools import StructuredTool
 from typing import Optional, List
-from langchain_core.schema.language_model import BaseLanguageModel
+from langchain_core.language_models import BaseLanguageModel
 from pydantic import BaseModel, Field
-import streamlit as st
+# import streamlit as st
 
 # Tool argument schemas
 class RagArgs(BaseModel):
