@@ -4,7 +4,7 @@ Tools and Agent implementation for the Virtual TA system.
 
 from langchain.tools import StructuredTool
 from typing import Optional, List
-from langchain.schema.language_model import BaseLanguageModel
+from langchain_core.schema.language_model import BaseLanguageModel
 from pydantic import BaseModel, Field
 import streamlit as st
 

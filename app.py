@@ -1,7 +1,7 @@
 import streamlit as st
 from langchain_core.messages import HumanMessage, AIMessage
 
-from langchain.globals import set_verbose
+# from langchain_core.globals import set_verbose
 import utils.chains_lcel as chains
 from utils.sidebar import sidebar
 import utils.llm_models as llms
@@ -121,10 +121,10 @@ def main():
         # decide which tool to call
         tool_call = agent.invoke(
             f"""
-            Your only task is to decide which tool to call based on the user query delimited with <query> tab and chat history, and generate the appropriate arguements for the tool call.
+            Your only task is to decide which tool to call based on the user query delimited with <query> tags and chat history, and generate the appropriate arguements for the tool call. 
             
             Previous conversation: {conversation_context} \n
-            Query: {user_query}\n
+            Query: <query>{user_query}</query>\n
             Generate the tool call with appropriate arguments. Do not generate direct response. Enrich the query for the tool call when appropriate, but don't fundamentally change it. Limit query to no more than 25 tokens.
             """)
         
