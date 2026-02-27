@@ -14,3 +14,7 @@ etc/
 
 # Explicitly ignore .env file for security
 .env
+
+# Ignore vector database directories
+data/emb_db/
+data/chroma_db/

@@ -52,7 +52,7 @@ claude_opus = ChatAnthropic(
         )
 
 claude_haiku = ChatAnthropic(
-        model='claude-3-5-haiku-20241022',
+        model='claude-haiku-4-5',
         temperature=TEMPERATURE,
         max_tokens=MAX_TOKENS
         )
