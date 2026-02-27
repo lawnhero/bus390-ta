@@ -4,10 +4,18 @@ import streamlit as st
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # knowledge base path
 kb_db_path = 'data/emb_db'
-MONGODB_PASSWORD="9vYq3TWWsQn7bp2v"
+MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
+
+if not MONGODB_PASSWORD:
+    raise ValueError("MONGODB_PASSWORD environment variable is not set. Please check your .env file.")
 
 
 
@@ -15,14 +23,12 @@ MONGODB_PASSWORD="9vYq3TWWsQn7bp2v"
 # load the vectorized database
 def load_db(db_path=kb_db_path, embedding_model='text-embedding-ada-002'):
     embeddings = OpenAIEmbeddings(model=embedding_model, chunk_size=1)
-    db_loaded = FAISS.load_local(db_path, embeddings, 
-                                 allow_dangerous_deserialization=True
-                                 )
+    db_loaded = FAISS.load_local(db_path, embeddings)
     print("Database loaded")
     return db_loaded
 
 
-uri = f"mongodb+srv://streamlit_app:{MONGODB_PASSWORD}@virtual-ta.q344d.mongodb.net/myFirstDatabase?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE"
+uri = f"mongodb+srv://streamlit_app:{MONGODB_PASSWORD}@virtual-ta.q344d.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
 
 # MongoDB Atlas connection
 @st.cache_resource
