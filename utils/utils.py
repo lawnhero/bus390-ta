@@ -6,6 +6,7 @@ from pymongo.server_api import ServerApi
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+import certifi
 
 # Load environment variables from .env file
 load_dotenv()
@@ -42,8 +43,16 @@ uri = f"mongodb+srv://streamlit_app:{MONGODB_PASSWORD}@virtual-ta.q344d.mongodb.
 # MongoDB Atlas connection
 @st.cache_resource
 def query_db_connection():
-    """Return a MongoDB connection to the user_queries_db database."""
-    client = MongoClient(uri, server_api=ServerApi('1'))
+    """
+    Return a MongoDB connection to the user_queries_db database.
+    
+    Uses proper SSL/TLS certificate validation with certifi for security.
+    """
+    client = MongoClient(
+        uri, 
+        server_api=ServerApi('1'),
+        tlsCAFile=certifi.where()  # Use certifi's CA bundle for proper SSL verification
+    )
     print("Connected to MongoDB")
     return client['user_queries_db']
 
