@@ -22,8 +22,21 @@ if not MONGODB_PASSWORD:
 @st.cache_resource
 # load the vectorized database
 def load_db(db_path=kb_db_path, embedding_model='text-embedding-ada-002'):
+    """
+    Load the FAISS vector database.
+    
+    Note: allow_dangerous_deserialization=True is required by FAISS for loading pickle files.
+    This is safe in this context because:
+    - The database is created locally by the application
+    - It's stored in the project's data directory (data/emb_db)
+    - It's not loaded from an untrusted external source
+    """
     embeddings = OpenAIEmbeddings(model=embedding_model, chunk_size=1)
-    db_loaded = FAISS.load_local(db_path, embeddings)
+    db_loaded = FAISS.load_local(
+        db_path, 
+        embeddings,
+        allow_dangerous_deserialization=True  # Safe: database is created locally and stored in project data directory
+    )
     print("Database loaded")
     return db_loaded
 
