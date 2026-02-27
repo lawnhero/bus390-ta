@@ -17,4 +17,3 @@ etc/
 
 # Ignore vector database directories
 data/emb_db/
-data/chroma_db/
