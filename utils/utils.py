@@ -1,5 +1,6 @@
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
+from chromadb import Settings
 import streamlit as st
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -32,7 +33,8 @@ def load_db(db_path=kb_db_path, embedding_model='text-embedding-ada-002'):
     embeddings = OpenAIEmbeddings(model=embedding_model, chunk_size=1)
     db_loaded = Chroma(
         persist_directory=db_path,
-        embedding_function=embeddings
+        embedding_function=embeddings,
+        client_settings=Settings(anonymized_telemetry=False)
     )
     print("Database loaded")
     return db_loaded
