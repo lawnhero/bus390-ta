@@ -61,12 +61,12 @@ def initialize_chains(_retriever):
     try:
         chains_dict = {
             "course_information": chains.rag_chain(llms.claude_haiku, _retriever),
-            "generate_exercise": chains.exercise_chain(llms.claude_sonnet),
-            "general_chat": chains.chat_chain(llms.openai_gpt4o_mini),
-            "explain_concept": chains.explain_chain(llms.openai_gpt4o),
+            "generate_exercise": chains.exercise_chain(llms.openai_gpt56_luna),
+            "general_chat": chains.chat_chain(llms.openai_gpt56_luna),
+            "explain_concept": chains.explain_chain(llms.openai_gpt56_luna),
             "debug_code": chains.debug_chain(llms.claude_haiku),
         }
-        tool_chain = create_tool_chain(llms.openai_gpt4o_mini, chains_dict)
+        tool_chain = create_tool_chain(llms.openai_gpt56_luna, chains_dict)
         return tool_chain, chains_dict
     except Exception as e:
         st.error(f"Failed to initialize chains: {str(e)}")

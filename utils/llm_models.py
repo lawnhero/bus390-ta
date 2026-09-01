@@ -5,51 +5,35 @@ from langchain_anthropic import ChatAnthropic
 TEMPERATURE = 0.2
 MAX_TOKENS = 512
 
-# Code generation llm with gpt-3.5
-openai_gpt35 = ChatOpenAI(temperature=TEMPERATURE, 
-                 model="gpt-3.5-turbo",
-                 verbose=False,
-                 max_tokens=300,
-                 )
+# GPT-5.6 Luna. reasoning_effort="none" is required for /v1/chat/completions
+# plus tool calling — the same pin used in ISOM 352.
+openai_gpt56_luna = ChatOpenAI(
+    temperature=TEMPERATURE,
+    model="gpt-5.6-luna",
+    max_tokens=300,
+    reasoning_effort="none",
+)
 
-openai_gpt4o_mini = ChatOpenAI(temperature=TEMPERATURE, 
-                 model="gpt-4o-mini",
-                 verbose=False,
-                 max_tokens=300,
-                 )
+openai_gpt56_luna_json = ChatOpenAI(
+    temperature=TEMPERATURE,
+    model="gpt-5.6-luna",
+    max_tokens=300,
+    reasoning_effort="none",
+    model_kwargs={"response_format": {"type": "json_object"}},
+)
 
-openai_4o_mini_json = ChatOpenAI(temperature=TEMPERATURE,
-        model="gpt-4o-mini",
-        max_tokens=300,
-        model_kwargs={ "response_format": { "type": "json_object" } }
-        )
+openai_gpt56_luna_router = ChatOpenAI(
+    temperature=0.1,
+    model="gpt-5.6-luna",
+    max_tokens=50,
+    reasoning_effort="none",
+)
 
-# Router llm: Choose OpenAI-GPT4 for better reasoning 
-openai_gpt4 = ChatOpenAI(temperature=0.1, 
-                 model="gpt-4-0125-preview",
-                 verbose=False,
-                 max_tokens=50,
-                 )
-
-
-openai_gpt4o = ChatOpenAI(temperature=0.1, 
-        model='gpt-4o',
-        # max_tokens=self.max_tokens,,
-        )
-
-# define the Anthropic chat client
-# overall style seems consistent with the OpenAI chat client
-claude_sonnet = ChatAnthropic(
-        model='claude-sonnet-4-5',
-        temperature=TEMPERATURE,
-        max_tokens=MAX_TOKENS
-        )
-
-claude_opus = ChatAnthropic(
-        model='claude-3-opus-20240229',
-        temperature=TEMPERATURE,
-        max_tokens=MAX_TOKENS
-        )
+# Names the rest of the app still imports.
+openai_gpt4o_mini = openai_gpt56_luna
+openai_4o_mini_json = openai_gpt56_luna_json
+openai_gpt4 = openai_gpt56_luna_router
+openai_gpt4o = openai_gpt56_luna
 
 claude_haiku = ChatAnthropic(
         model='claude-haiku-4-5',
