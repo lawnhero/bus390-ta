@@ -1,65 +1,75 @@
 import streamlit as st
-import os
+from datetime import datetime
+from langchain_core.messages import HumanMessage
+
+from utils.ui import (
+    MODULES,
+    COURSE_LABEL,
+    INSTRUCTOR_NAME,
+    INSTRUCTOR_EMAIL,
+    show_help_dialog,
+)
+
+# Every conversation-scoped key, in one place — ad-hoc clearing leaves stale
+# state behind. Keys describing the student (none yet) would deliberately survive.
+CONVERSATION_KEYS = (
+    "chat_history",
+    "message_meta",
+    "pending_intent",
+    "feedback_submitted_ids",
+    "starter_prompt_pills",
+    "topic_pills",
+)
+
 
 def clear_chat_history():
-    st.session_state.chat_history = []
+    for key in CONVERSATION_KEYS:
+        st.session_state.pop(key, None)
+
+
+def save_chat_history():
+    """Serialize the conversation to plain text for download."""
+    lines = [f"{COURSE_LABEL} — Virtual TA chat, saved {datetime.now():%Y-%m-%d %H:%M}", ""]
+    for message in st.session_state.get("chat_history", []):
+        speaker = "You" if isinstance(message, HumanMessage) else "Virtual TA"
+        lines.append(f"{speaker}:\n{message.content}\n")
+    return "\n".join(lines)
+
 
 def sidebar():
     with st.sidebar:
-        
-        st.markdown(
-            "## Example use cases\n"
-            "1. How can I contact the professor?\n" 
-            "2. What's a parameter in Python function\n"
-            "3. How to use my own module in Colab? \n"
-            "4. How to fix the error in my code? \n"
-            "5. Give me a practice question on Python functions\n"
-        )
-        # st.markdown("---")
-        st.markdown(
-            "## General advice\n"
-            "1. Provide detailed context.\n" 
-            "2. Try your questions in different ways.\n"
-            "3. Query about specific task.\n"
-        )
-        st.markdown("---")
-        st.markdown("# About")
-        st.markdown(
-            '''📖 Virtual TA allows you to ask questions about course logistics, 
-            as well as any Python coding questions.'''
-        )
-        st.markdown(
-            "This tool is a work in progress. "
-        )
-        st.markdown("Made by Dr.Wenjun Gu (wenjun.gu@emory.edu)")
-       
+        # 1. Primary action
+        if st.button("New chat", icon=":material/add_comment:", type="primary", width="stretch"):
+            clear_chat_history()
 
-        # api_key_input = st.text_input(
-        #     "OpenAI API Key",
-        #     type="password",
-        #     placeholder="Paste your OpenAI API key here (sk-...)",
-        #     help="You can get your API key from https://platform.openai.com/account/api-keys.",  # noqa: E501
-        #     value=os.environ.get("OPENAI_API_KEY", None)
-        #     or st.session_state.get("OPENAI_API_KEY", ""),
-        # )
+        # 2. Two quiet actions on one row
+        with st.container(horizontal=True):
+            if st.session_state.get("chat_history"):
+                st.download_button(
+                    "Save chat",
+                    data=save_chat_history(),
+                    file_name=f"python_ta_chat_{datetime.now():%Y%m%d_%H%M}.txt",
+                    mime="text/plain",
+                    icon=":material/download:",
+                    width="stretch",
+                )
+            else:
+                st.button("Save chat", icon=":material/download:", disabled=True,
+                          width="stretch", help="No conversation to save yet")
+            if st.button("How this works", icon=":material/help:", width="stretch"):
+                show_help_dialog()
 
-        # user_name = st.text_input(
-        #     "Enter your name ",
-        #     # type="password",
-        #     placeholder="Your prefered name here...",
-        #     help="This information will be deleted after each session",  # noqa: E501
-        #     value='ISOM 352 Coder',
-        # )
+        # 3. What the tutor can help with — driven by the same MODULES list as
+        #    the topic pills, so the two can never disagree.
+        st.space("small")
+        with st.expander("The course modules", icon=":material/checklist:"):
+            st.markdown("\n".join(
+                f"- **{m['code']} · {m['title']}** — {m['covers']}" for m in MODULES
+            ))
+            st.caption("Plus course questions: syllabus, assignments, and policies.")
 
-        # st.session_state["user_name"] = user_name
-
-#         st.markdown("---")
-
-
-#         st.markdown(
-#         """
-# # FAQ
-# ## Best practice for interacting with virtual TA?
-# Your query should provide as much information as possible to help identify the correct knowledge.  
-# """
-#         )
+        # 4. Footer
+        st.space("medium")
+        st.caption(COURSE_LABEL)
+        st.caption("This tutor is a work in progress and can make mistakes.")
+        st.caption(f"Made by {INSTRUCTOR_NAME} · [{INSTRUCTOR_EMAIL}](mailto:{INSTRUCTOR_EMAIL})")

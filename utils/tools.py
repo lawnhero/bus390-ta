@@ -127,11 +127,11 @@ def chat_tool(chain):
 def create_tool_chain(llm: BaseLanguageModel, chain_dict: dict):
     """Create a tool-enabled LLM chain."""
     tools = [
-        rag_tool(chain_dict['rag']),
-        explain_tool(chain_dict['explain']),
-        exercise_tool(chain_dict['exercise']),
-        debug_tool(chain_dict['debug']),
-        chat_tool(chain_dict['chat'])
+        rag_tool(chain_dict['course_information']),
+        explain_tool(chain_dict['explain_concept']),
+        exercise_tool(chain_dict['generate_exercise']),
+        debug_tool(chain_dict['debug_code']),
+        chat_tool(chain_dict['general_chat'])
     ]
     
     # Bind tools to LLM with system message

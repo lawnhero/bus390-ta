@@ -23,7 +23,7 @@ if not MONGODB_PASSWORD:
 
 @st.cache_resource
 # load the vectorized database
-def load_db(db_path=kb_db_path, embedding_model='text-embedding-ada-002'):
+def load_db(db_path=kb_db_path, embedding_model='text-embedding-3-small'):
     """
     Load the ChromaDB vector database.
     
